@@ -4,7 +4,10 @@ import (
 	"log"
 	"net"
 
+	"github.com/ajvideira/fullcycle-grpc/pb"
+	"github.com/ajvideira/fullcycle-grpc/services"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 
@@ -16,6 +19,9 @@ func main() {
 	}
 
 	grpcServer := grpc.NewServer();
+
+	pb.RegisterUserServiceServer(grpcServer, services.NewUserService())
+	reflection.Register(grpcServer)
 
 	err = grpcServer.Serve(lis);
 	if err != nil {
