@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"time"
 
 	"github.com/ajvideira/fullcycle-grpc/pb"
 	"google.golang.org/grpc"
@@ -22,8 +23,9 @@ func main() {
 
 	client := pb.NewUserServiceClient(connection)
 
-	addUser(client)
-	addUserVerbose(client)
+	//addUser(client)
+	//addUserVerbose(client)
+	addUsers(client)
 }
 
 func addUser(client pb.UserServiceClient) {
@@ -62,4 +64,34 @@ func addUserVerbose(client pb.UserServiceClient) {
 		}
 		fmt.Println(stream.GetStatus())
 	}
+}
+
+func addUsers(client pb.UserServiceClient) {
+	requestStream, err := client.AddUsers(context.Background())
+	if err != nil {
+		log.Fatalf("Error sending the stream: %v", err)
+	}
+	err = requestStream.Send(&pb.User{
+		Name: "Jonathan",
+		Email: "jonathan.videira@gmail.com",
+	})
+	if err != nil {
+		log.Fatalf("Error sending the user Jonathan: %v", err)
+	}
+
+	time.Sleep(time.Second * 3)
+
+	err = requestStream.Send(&pb.User{
+		Name: "Manuela",
+		Email: "castilhos.manuela@gmail.com",
+	})
+	if err != nil {
+		log.Fatalf("Error sending the user Manuela: %v", err)
+	}
+
+	users, err := requestStream.CloseAndRecv()
+	if err != nil {
+		log.Fatalf("Error closing de send stream: %v", err)
+	}
+	fmt.Println(users)
 }

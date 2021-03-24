@@ -3,6 +3,8 @@ package services
 import (
 	"context"
 	"fmt"
+	"io"
+	"log"
 	"time"
 
 	"github.com/ajvideira/fullcycle-grpc/pb"
@@ -52,4 +54,32 @@ func (userService *UserService) AddUserVerbose(req *pb.User, stream pb.UserServi
 	})
 
 	return nil
+}
+
+func (userService *UserService) AddUsers(stream pb.UserService_AddUsersServer) error {
+
+	users := []*pb.User{}
+
+	index := 0;
+
+	for {
+		index = index + 1;
+
+		req, err := stream.Recv()
+		if err == io.EOF {
+			fmt.Println("End of request stream")
+			return stream.SendAndClose(&pb.Users{
+				User: users,
+			})
+		}
+		if err != nil {
+			log.Fatalf("Error receiving request stream: %v", err)
+		}
+		fmt.Println("Receiving user ", req.GetName())
+		users = append(users, &pb.User{
+			Id: fmt.Sprint(index),
+			Name: req.GetName(),
+			Email: req.GetEmail(),
+		})
+	}
 }
