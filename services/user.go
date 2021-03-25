@@ -82,4 +82,45 @@ func (userService *UserService) AddUsers(stream pb.UserService_AddUsersServer) e
 			Email: req.GetEmail(),
 		})
 	}
+
+}
+
+func (userService *UserService) AddUsersBidirectional(stream pb.UserService_AddUsersBidirectionalServer) (error) {
+	index := 0
+	for {
+		req, err := stream.Recv()
+		if err == io.EOF {
+			fmt.Println("End of receive streaming")
+			return nil
+		}
+		if err != nil {
+			log.Fatalf("Error receiving data: %v", err)
+		}
+
+		time.Sleep(time.Second * 3)
+
+		stream.Send(&pb.UserResultStream{
+			Status: fmt.Sprintf("Init insert process for %s", req.GetName()),
+			User: nil,
+		})
+
+		time.Sleep(time.Second * 3)
+
+		stream.Send(&pb.UserResultStream{
+			Status: fmt.Sprintf("Inserting %s", req.GetName()),
+			User: nil,
+		})
+		
+		time.Sleep(time.Second * 3)
+
+		index = index + 1
+		stream.Send(&pb.UserResultStream{
+			Status: fmt.Sprintf("%s complete insert", req.GetName()),
+			User: &pb.User{
+				Id: fmt.Sprint(index),
+				Name: req.GetName(),
+				Email: req.GetEmail(),
+			},
+		})
+	}
 }
