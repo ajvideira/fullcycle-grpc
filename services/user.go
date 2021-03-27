@@ -99,6 +99,7 @@ func (userService *UserService) AddUsersBidirectional(stream pb.UserService_AddU
 
 		time.Sleep(time.Second * 3)
 
+		fmt.Printf("Init insert process for %s\n", req.GetName())
 		stream.Send(&pb.UserResultStream{
 			Status: fmt.Sprintf("Init insert process for %s", req.GetName()),
 			User: nil,
@@ -106,6 +107,7 @@ func (userService *UserService) AddUsersBidirectional(stream pb.UserService_AddU
 
 		time.Sleep(time.Second * 3)
 
+		fmt.Printf("Inserting %s\n", req.GetName())
 		stream.Send(&pb.UserResultStream{
 			Status: fmt.Sprintf("Inserting %s", req.GetName()),
 			User: nil,
@@ -114,6 +116,7 @@ func (userService *UserService) AddUsersBidirectional(stream pb.UserService_AddU
 		time.Sleep(time.Second * 3)
 
 		index = index + 1
+		fmt.Printf("%s complete insert\n", req.GetName())
 		stream.Send(&pb.UserResultStream{
 			Status: fmt.Sprintf("%s complete insert", req.GetName()),
 			User: &pb.User{
